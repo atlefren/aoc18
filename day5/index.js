@@ -34,9 +34,8 @@ readLines('input.txt', d => d).then(data => data[0]).then(polymer => {
 
     console.log(`Part 1: Remaining units ${reduce(polymer.split('')).length}`);
 
-    const unitTypes = ['a', 'b', 'c', 'd'];
-    const lengths = unitTypes.map(unitType => reduce(removeUnits(polymer.split(''), unitType)).length);
+    const unitTypes = 'abcdefghijklmnopqrstuvwxyz'.split('');
+    const lengths = unitTypes
+        .map(unitType => reduce(removeUnits(polymer.split(''), unitType)).length);
     console.log(`Part 2: Remaining units ${Math.min.apply(null, lengths)}`);
 });
-
-//2: 11432 too high
