@@ -19,18 +19,10 @@ const findFirstDouble = changes => {
     }
 };
 
-
-
-
-
-
 readChanges('input.txt').then(changes => {
     const initialFrequency = 0;
 
-    const finalFrequency = changes.reduce(getNextFrequency, initialFrequency);
-    //console.log(`finalFrequency = ${finalFrequency}`);
+    console.log(`Part 1: finalFrequency = ${changes.reduce(getNextFrequency, initialFrequency)}`);
 
-    console.time('time');
-    console.log(`first double = ${findFirstDouble(changes)}`);
-    console.timeEnd('time');
+    console.log(`Part 2: first double = ${findFirstDouble(changes)}`);
 });

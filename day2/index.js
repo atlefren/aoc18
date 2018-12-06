@@ -2,17 +2,6 @@ const readLines = require('../index.js');
 
 const readIds = filename => readLines(filename, i => i);
 
-const ids = [
-    'abcde',
-    'fghij',
-    'klmno',
-    'pqrst',
-    'fguij',
-    'axcye',
-    'wvxyz',
-    'fgaij'
-];
-
 const letterFrequencies = id => id.split('').reduce((acc, char) => {
         acc[char] = (acc[char] || 0) + 1;
         return acc;
@@ -68,8 +57,7 @@ const findCommon = ids => {
 
 const removeAtIndex = (arr, idx) => arr.slice(0, idx).concat(arr.slice(idx + 1));
 
-const comminString = ids => {
-    console.log(ids);
+const commonString = ids => {
     const id1 = ids[0].split('');
     const id2 = ids[1].split('');
     let i = 0;
@@ -82,11 +70,7 @@ const comminString = ids => {
 
 };
 
-
 readIds('input.txt').then(ids => {
-    console.log(`checksum = ${getChecksum(ids, [2, 3])}`);
-    console.log(comminString(findCommon(ids)));
+    console.log(`Part 1: checksum = ${getChecksum(ids, [2, 3])}`);
+    console.log(`Part 2: common string =  ${commonString(findCommon(ids))}`);
 });
-
-
-//findCommon(ids);
