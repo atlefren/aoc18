@@ -12,12 +12,6 @@ const parseStep = step => {
 
 const readSteps = filename => readLines(filename, parseStep);
 
-const getStart = steps => {
-    const ids = new Set(steps.map(s => s.id));
-    const depends = new Set(steps.map(s => s.before));
-    return [...depends].filter(x => !ids.has(x)).sort()[0];
-};
-
 const allSteps = steps => {
     const ids = new Set(steps.map(s => s.id));
     const depends = new Set(steps.map(s => s.before));
@@ -26,7 +20,7 @@ const allSteps = steps => {
 
 
 const getUnused = (used, steps) => {
-    const ids = allSteps(steps); //new Set(steps.map(s => s.id));
+    const ids = allSteps(steps);
     const usedSet = new Set(used);
     return [...ids].filter(x => !usedSet.has(x));
 };
@@ -47,22 +41,88 @@ const getCandidates = (used, steps) => {
 
 
 const getNext = (used, steps) => {
-    return getCandidates(used, steps).sort()[0];
+    return getCandidates(used, steps).sort();
 };
+
 
 const getOrder = steps => {
     const numSteps = allSteps(steps).size;
-    const used = [];
+    const finished = [];
 
-    while (used.length < numSteps) {
-        const next = getNext(used, steps);
-        used.push(next);
+    while (finished.length < numSteps) {
+        const next = getNext(finished, steps)[0];
+        finished.push(next);
     }
-    return used.join('');
+    return finished.join('');
+};
+
+const getFreeWorkers = workers => workers
+    .filter(worker => worker.timeRemaining <= 0)
+    .map(worker => worker.id);
+
+
+const updateWorkers = (workers, id, timeRemaining, workingOn) => workers
+    .map(w => w.id === id
+        ? {id: id, timeRemaining: timeRemaining, workingOn: workingOn}
+        : w
+    );
+
+
+const advanceTime = workers => workers
+    .map(w => ({...w, timeRemaining: w.timeRemaining - 1}));
+
+
+const getTime = (task, addon) => 'abcdefghijklmnopqrstuvwxyz'
+    .split('')
+    .indexOf(task.toLowerCase()) + 1 + addon;
+
+
+const getInProgress = (workers) => workers
+    .filter(w => w.timeRemaining > 0 && w.workingOn !== null)
+    .map(w => w.workingOn);
+
+const getCompleted = (workers) => workers
+.filter(w => w.timeRemaining === 0 && w.workingOn !== null)
+.map(w => w.workingOn);
+
+
+
+const getTimeParalell = (steps, numWorkers, timeAdd) => {
+    const numSteps = allSteps(steps).size;
+    const finished = [];
+    let tick = -1;
+
+    let workers = [...Array(numWorkers).keys()].map((id) => ({
+        id: id,
+        timeRemaining: 0,
+        workingOn: null
+    }));
+
+    while (finished.length < numSteps) {
+        tick = tick + 1;
+        finished.push(...getCompleted(workers));
+
+        const freeWorkers = getFreeWorkers(workers);
+        if (freeWorkers.length) {
+            const inProgress = new Set(getInProgress(workers));
+            const next = getNext(finished, steps).filter(id => !inProgress.has(id));
+            for (var i = 0; i < next.length; i++) {
+                const task = next[i];
+                const worker = freeWorkers.shift();
+                if (worker !== undefined) {
+                    const time = getTime(task, timeAdd);
+                    workers = updateWorkers(workers, worker, time, task);
+                }
+            }
+        }
+        workers = advanceTime(workers);
+    }
+    return tick;
 };
 
 
-readSteps('input.txt').then(steps => {
 
+readSteps('input.txt').then(steps => {
     console.log(`Part 1: order = ${getOrder(steps)}`);
+    console.log(`Part 2: time = ${getTimeParalell(steps, 15, 60)}`);
 });
