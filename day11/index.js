@@ -31,26 +31,40 @@ const getBounds = (x0, y0, w, h) => ({
     maxX: x0 + w - 1
 });
 
-const computeSquare = (x0, y0, grid) =>
-    reduceBounds(getBounds(x0, y0, 3, 3), (x, y, sum) => sum + grid[y - 1][x - 1], 0);
+const computeSquare = (x0, y0, s, grid) =>
+    reduceBounds(getBounds(x0, y0, s, s), (x, y, sum) => sum + grid[y - 1][x - 1], 0);
 
 
-const getMaxSquare = (w, h, grid) => {
-    const bounds = {minY: 1, maxY: h - 2, minX: 1, maxX: w - 2};
+const getMaxSquare = (w, h, squareSize, grid) => {
+    const bounds = {minY: 1, maxY: h - squareSize - 1, minX: 1, maxX: w - squareSize - 1};
+
+    //console.log(bounds)
+
     let [maxLevel, maxX, maxY] = [-Infinity, -1, -1];
     loopBounds(bounds, (x, y) => {
-        const level = computeSquare(x, y, grid);
+        const level = computeSquare(x, y, squareSize, grid);
         if (level > maxLevel) {
             [maxLevel, maxX, maxY] = [level, x, y];
         }
     });
-    return {x: maxX, y: maxY, level: maxLevel};
+    return {x: maxX, y: maxY, level: maxLevel, squareSize: squareSize};
 };
 
+const getMaxPower = (serial, squareSize) => {
+    const [w, h] = [300, 300];
+    return getMaxSquare(w, h, squareSize, createGrid(w, h, serial));
+};
 
-
-const getMaxPower = (w, h, serial) => {
-    return getMaxSquare(w, h, createGrid(w, h, serial));
+const getMaxPowerVarySquare = (serial) => {
+    return [...Array(300).keys()]
+        .map(s => s + 1)
+        .reduce((acc, size) => {
+            //console.log(size)
+            const res = getMaxPower(serial, size);
+            return (res.level > acc.level)
+                ? res
+                : acc;
+        }, {level: -Infinity});
 };
 
 
@@ -60,10 +74,29 @@ const examples = [
 ];
 
 examples.forEach(e => {
-    const res = getMaxPower(300, 300, e.serial);
+    const res = getMaxPower(e.serial, 3);
     console.log(res.x === e.x && res.y === e.y && res.level === e.level);
 });
 
 
-const max = getMaxPower(300, 300, 5153);
+const max = getMaxPower(5153, 3);
 console.log(`Part 1: coord = ${max.x},${max.y}`);
+
+
+const examples2 = [
+    {serial: 18, x: 90, y: 269, level: 113, size: 16}
+    //{serial: 42, x: 232, y: 251, level: 119, size: 12}
+];
+
+/*
+//SLOOOOOOW (~~15-20 min)
+
+examples2.forEach(e => {
+    const res = getMaxPowerVarySquare(e.serial);
+    console.log(res.x === e.x && res.y === e.y && res.level === e.level && res.squareSize === e.size);
+});
+
+const max2 = getMaxPowerVarySquare(5153);
+console.log(`Part 2: coord = ${max2.x},${max2.y},${max2.squareSize}`);
+
+*/
