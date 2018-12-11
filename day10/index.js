@@ -65,8 +65,8 @@ const getPositionsAt = (points, time) => points.map(p => ({
 
 
 const getTimeWhenSmallest = points => {
-    let prevW = Infinity;
-    let prevH = Infinity;
+    let [prevW, prevH] = [Infinity, Infinity];
+
 
     let t = 0;
     while (true) {
@@ -77,8 +77,7 @@ const getTimeWhenSmallest = points => {
         if (w > prevW && h > prevH) {
             break;
         }
-        prevW = w;
-        prevH = h;
+        [prevW, prevH] = [w, h];
 
         t++;
     }
