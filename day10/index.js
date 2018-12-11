@@ -85,14 +85,17 @@ const getTimeWhenSmallest = points => {
     return t - 1;
 };
 
-const readMessage = points => {
-    const time = getTimeWhenSmallest(points);
+const readMessage = (points, time) => {
     const positions = getPositionsAt(points, time);
     const bounds = getBounds(positions);
     return drawPositions(positions, bounds);
 };
 
 readPoints('input.txt').then(points => {
+    const time = getTimeWhenSmallest(points);
+
     console.log('Part 1:');
-    console.log(readMessage(points));
+    console.log(readMessage(points, time));
+
+    console.log(`Part 2: time = ${time}`);
 });
