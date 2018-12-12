@@ -164,6 +164,47 @@ const sumPots = pots => {
     return sum;
 };
 
+const fixed = (capacity) => {
+    const arr = [];
+    return {
+        push: (el) => {
+            if (arr.length >= capacity) {
+                arr.shift();
+            }
+            arr.push(el);
+
+        },
+        get: () => arr,
+        length: () => arr.length
+    };
+};
+
+const isEqual = arr => !isNaN(arr.reduce((a, b) => a === b ? a : NaN));
+
+const converge = (initialState, notes, numGenerations) => {
+    let prevSum = 0;
+    let sum = 0;
+    let list = createPotList(initialState);
+    let generation = 1;
+
+    const last100 = fixed(100);
+
+    while (true) {
+        list = nextGen(list, notes);
+        sum = sumPots(list);
+        last100.push(sum - prevSum);
+
+        if (generation > 100 && isEqual(last100.get())) {
+            break;
+        }
+        prevSum = sum;
+        generation += 1;
+    }
+    const add = last100.get()[last100.length() - 1];
+    const remaining = numGenerations - generation;
+    return sum + (remaining * add);
+};
+
 readLines('input.txt', a => a).then(parseInput).then(input => {
 
     const {initialState, notes} = input;
@@ -171,8 +212,11 @@ readLines('input.txt', a => a).then(parseInput).then(input => {
     console.time('linkedlist');
     const sum = sumPots(advance(20, createPotList(initialState), notes));
     console.log(`Part 1: Sum = ${sum}`);
-    console.log(sum === 1184);
     console.timeEnd('linkedlist');
+
+    //solve by finding convergence
+    const sum2 = converge(initialState, notes, 50000000000);
+    console.log(`Part 2: Sum = ${sum2}`);
 
     /* will take 517 days approx?
     console.time('linkedlist2');
